@@ -112,9 +112,14 @@ FG_Made_40_49
 %FG_Made_50+
 FG_Made_50
 
-
-
-Opportunity Adj Override
-Performance Adj Override
+-IndFumblesPerTouch
 IndFumblesPerTouch
+IndFumblesPerTouch_projections
+IndFumblesPerTouch
+IndFumblesPerTouch
+
+-IndFumblesLostPct
+IndFumblesLostPct
+IndFumblesLostPct_projections
+IndFumblesLostPct
 IndFumblesLostPct
