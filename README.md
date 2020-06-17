@@ -1,8 +1,9 @@
 //players_results_field
+//tablename
 //for projections field
 //api
 
-%ofRushAtt
+-%ofRushAtt
 %ofRushAtt
 
 
