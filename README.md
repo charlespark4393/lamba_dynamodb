@@ -1,125 +1,84 @@
-//players_results_field
-//tablename
-//for projections field
-//api
+const functions = require('firebase-functions');
+const express = require('express');
+const cors = require('cors');
+var nodemailer = require('nodemailer');
+var moment = require('moment');
+const app = express();
+app.use(cors({ origin: true }));
 
--%ofRushAtt
-%ofRushAtt
-%ofRushAtt_projections
-%ofRushAtt
-ofRushAtt
+var transporter = nodemailer.createTransport({
+    name: 'mail.ambridgelending.com',
+    host: 'box1317.bluehost.com',
+    port: 26,
+    secure: false,
+    auth: {=
+    },
+    tls: {rejectUnauthorized: false}
+});
 
--RushYPC
-RushYPC
-RushYPC_projections
-RushYPC
-RushYPC
+function pad(num, size = 2) {
+    var s = num+"";
+    while (s.length < size) s = "0" + s;
+    return s;
+}
 
+function convertToServerTimeZone(){
+    //EST
+    offset = -5.0
+    clientDate = new Date();
+    utc = clientDate.getTime() + (clientDate.getTimezoneOffset() * 60000);
+    serverDate = new Date(utc + (3600000*offset));
+    return serverDate
+}
 
--RushTDPerAtt
-RushTDPerAtt
-RushTDPerAtt_projections
-RushTDPerAtt
-RushTDPerAtt
+function getCurrentDate() {
+    var d = convertToServerTimeZone()
+    var dformat = [pad(d.getMonth()+1),
+                 pad(d.getDate()),
+                 d.getFullYear()].join('/')+' '+
+                [pad(d.getHours()),
+                 pad(d.getMinutes()),
+                 pad(d.getSeconds())].join(':');
+    return dformat
+}
 
+app.post('/sendEmail', (req, res) => {
+    (async () => {
+        try {
+            const data = req.body
+            const subject = `New CASTLE Decline Creditcard - TransID: ${data.transID}`
+            const message = `
+                <p>New CASTLE Decline Creditcard - TransID: <span STYLE="font-weight: 600">${data.transID}<span><p>
 
+                <p>On <span STYLE="font-weight: 600">${getCurrentDate()}</span>, there was an error processing TRANS <span STYLE="font-weight: 600">${data.transID}</span>. Please check this issue in your Pineapple Payment dashboard.</p>
+                
+                <p>Timestamp: <span STYLE="font-weight: 600">${getCurrentDate()}</span></p>
+                <p>Credit Card Number: <span STYLE="font-weight: 600">***${data.creditNumber}</span></p>
+                <p>Status Code: <span STYLE="font-weight: 600">${data.statusCode}</span></p>
+                <p>Status MSG: <span STYLE="font-weight: 600">${data.statusMsg}</span></p>
+            `
+            const to = ['contact@aikenrefuse.com', 'info@aikenrefuse.com', 'charlespark4393@gmail.com']
+            var mailOptions = {
+                from: 'customerPortal@aikenrefuse.com',
+                to: to,
+                subject: subject,
+                html: message
+            };
+            transporter.sendMail(mailOptions, function(error, info){
+                if (error) {
+                    console.log('error', error)
+                } else {
+                    console.log('info', info)
+                }
+            })
+            return res.status(200).send({
+                ...data
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send(error);
+        }
+    })();
+});
 
-
--%ofRecTarg
-%ofRecTarg
-%ofRecTarg_projections
-%ofRecTarg
-ofRecTarg
-
-
--ReceptPerTarg
-ReceptPerTarg
-ReceptPerTarg_projections
-ReceptPerTarg
-ReceptPerTarg
-
-
-
--RecYdsPerRecept
-RecYdsPerRecept
-RecYdsPerRecept_projections
-RecYdsPerRecept
-RecYdsPerRecept
-
--RecTDPerRecept
-RecTDPerRecept
-RecTDPerRecept_projections
-RecTDPerRecept
-RecTDPerRecept
-
-
--%ofKickAttempts
-%ofKickAttempts
-%ofKickAttempts_projections
-%ofKickAttempts
-ofKickAttempts
-
-
-
--PATAtt/TD
-PATAtt
-PATAtt/TD_projections
-PATAtt/TD
-PATAtt_TD
-
--PATComp%
-PATComp
-PATComp%_projections
-PATComp%
-PATComp
-
--Yards/FGAtt
-YardsPerFGAtt
-Yards/FGAtt_projections
-Yards/FGAtt
-Yards_FGAtt
-
--%FG Att 40-49
-FGAtt40-49
-%FG_Att_40-49_projections
-%FG_Att_40-49
-FG_Att_40_49
-
--%FG Att 50+
-FGAttOver49
-%FG_Att_50+_projections
-%FG_Att_50+
-FG_Att_50
-
-
--%FG Made 0-39
-%FG_Made_0-39
-%FG_Made_0-39_projections
-%FG_Made_0-39
-FG_Made_0_39
-
-
--%FG Made 40-49
-%FG_Made_40-49
-%FG_Made_40-49_projections
-%FG_Made_40-49
-FG_Made_40_49
-
-
--%FG Made 50+
-%FGMade50+
-%FG_Made_50+_projections
-%FG_Made_50+
-FG_Made_50
-
--IndFumblesPerTouch
-IndFumblesPerTouch
-IndFumblesPerTouch_projections
-IndFumblesPerTouch
-IndFumblesPerTouch
-
--IndFumblesLostPct
-IndFumblesLostPct
-IndFumblesLostPct_projections
-IndFumblesLostPct
-IndFumblesLostPct
+exports.DeclinedEmail = functions.https.onRequest(app);
